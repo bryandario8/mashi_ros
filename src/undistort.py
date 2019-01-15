@@ -7,19 +7,23 @@ import sys
 import rospy
 import numpy as np
 import cv2
+from message_filters import Subscriber, TimeSynchronizer
 from std_msgs.msg import String
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image,CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
 from distutils.version import LooseVersion 
 if LooseVersion(cv2.__version__).version[0]==3:
 
 
-	class image_converter:
+	class image_preprocesor:
 	 
 		def __init__(self):
-		    self.image_pub = rospy.Publisher("image_topic_2",Image,queue_size=255)
+		    self.image_pub = rospy.Publisher("mashi/image_topic",Image,queue_size=255)
 		    self.bridge = CvBridge()
-		    self.image_sub = rospy.Subscriber("/usb_cam/image_raw",Image,self.callback)
+		    self.image_sub = Subscriber("/usb_cam/image_raw",Image)
+		    self.camera_info = Subscriber("/mashi/camera_info",CameraInfo)
+		    ts = TimeSynchronizer([self.image_sub,self.camera_info],queue_size=10)
+		    ts.registerCallback(self.callback)
 
 
 		def undistort_image(self,img):
@@ -34,7 +38,7 @@ if LooseVersion(cv2.__version__).version[0]==3:
 		    undistorted_img = cv2.remap(img, map1, map2, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
 		    return undistorted_img
 
-		def callback(self,data):
+		def callback(self,data,info):
 		    try:
 		        cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
 		    except CvBridgeError as e:
@@ -54,8 +58,8 @@ if LooseVersion(cv2.__version__).version[0]==3:
 		       print(e)
 		
 	def main(args):
-		ic = image_converter()
-		rospy.init_node('image_converter', anonymous=True)
+		ip = image_preprocesor()
+		rospy.init_node('mashi_ros')
 		try:
 		   rospy.spin()
 		except KeyboardInterrupt:
