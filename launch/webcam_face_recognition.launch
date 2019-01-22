@@ -7,7 +7,7 @@
     <param name="camera_frame_id" value="usb_cam" />
     <param name="io_method" value="mmap"/>
   </node>
-  <node name="mashi_ros" pkg="mashi_ros" type="undistort.py" respawn="false" output="screen">
+  <node name="mashi_ros" pkg="mashi_ros" type="image_preprocessing.py" respawn="false" output="screen">
     
   </node>
   <node name="ros_face_recognition" pkg="ros_face_recognition" type="face_recognition_node.py" respawn="false" output="screen">
