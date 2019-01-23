@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width">
+<title>Mashi JS Bin</title>
+<script src="http://code.jquery.com/jquery-1.12.1.js"></script>
+<script src="http://code.responsivevoice.org/responsivevoice.js"></script>
+<script type="text/javascript" src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+<script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+
+<script type="text/javascript" type="text/javascript">
+  // Connecting to ROS
+  // -----------------
+
+  var ros = new ROSLIB.Ros({
+    url : 'ws://localhost:9090'
+  });
+
+  ros.on('connection', function() {
+    console.log('Connected to websocket server.');
+  });
+
+  ros.on('error', function(error) {
+    console.log('Error connecting to websocket server: ', error);
+  });
+
+  ros.on('close', function() {
+    console.log('Connection to websocket server closed.');
+  });
+
+  var personas = [];
+
+  // Subscribing to a Topic
+  // ----------------------
+
+  var listener = new ROSLIB.Topic({
+    ros : ros,
+    name : '/faces/box_info',
+    messageType : 'ros_face_recognition/Box'
+  });
+
+  listener.subscribe(function(message) {
+    console.log('Received message on ' + listener.name + ': ' + message.name + ' ' + message.label + ' ' + message.gender);
+    var name = message.name;
+    var existe = false;
+    personas.forEach(function(value, index, array){
+      if(value==name) { existe = true }
+    });
+    if(typeof(name)=="string" && !existe){    
+      var saludo = ""  
+      if(message.gender=="male"){
+        saludo = "Buen día, señor ";
+      }
+      else {
+        saludo = "Buen día, señora ";
+      }
+      var text = saludo + name;
+      responsiveVoice.speak(text,"Spanish Male");
+      text=encodeURIComponent(text);
+      personas.push(name);
+    }
+    //listener.unsubscribe();
+  });
+
+
+</script>
+</head>
+
+<body>
+  <h1>Simple roslib Example</h1>
+  <p>Check your Web Console for output.</p>
+  <audio src="" hidden class=speech></audio>
+</body>
+</html>
