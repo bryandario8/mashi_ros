@@ -48,13 +48,8 @@
       if(value==name) { existe = true }
     });
     if(typeof(name)=="string" && !existe){    
-      var saludo = ""  
-      if(message.gender=="male"){
-        saludo = "Buen día, señor ";
-      }
-      else {
-        saludo = "Buen día, señora ";
-      }
+      var saludo = "Buen día, "
+      
       var text = saludo + name;
       responsiveVoice.speak(text,"Spanish Male");
       text=encodeURIComponent(text);
